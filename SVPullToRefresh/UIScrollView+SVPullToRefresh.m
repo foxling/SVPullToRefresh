@@ -442,7 +442,7 @@ static char UIScrollViewPullToRefreshView;
 
 - (SVPullToRefreshArrow *)arrow {
     if(!_arrow) {
-		_arrow = [[SVPullToRefreshArrow alloc]initWithFrame:CGRectMake(0, self.bounds.size.height-54, 22, 48)];
+		_arrow = [[SVPullToRefreshArrow alloc]initWithFrame:CGRectMake(0, self.bounds.size.height-54, 22, 14)];
         _arrow.backgroundColor = [UIColor clearColor];
 		[self addSubview:_arrow];
     }
@@ -619,11 +619,11 @@ static char UIScrollViewPullToRefreshView;
     
     switch (self.position) {
         case SVPullToRefreshPositionTop:
-            if(!self.wasTriggeredByUser)
+            if(!self.wasTriggeredByUser && self.scrollView.contentOffset.y < -self.originalTopInset)
                 [self.scrollView setContentOffset:CGPointMake(self.scrollView.contentOffset.x, -self.originalTopInset) animated:YES];
             break;
         case SVPullToRefreshPositionBottom:
-            if(!self.wasTriggeredByUser)
+            if(!self.wasTriggeredByUser && self.scrollView.contentOffset.y < -self.originalTopInset)
                 [self.scrollView setContentOffset:CGPointMake(self.scrollView.contentOffset.x, self.scrollView.contentSize.height - self.scrollView.bounds.size.height + self.originalBottomInset) animated:YES];
             break;
     }
@@ -643,7 +643,9 @@ static char UIScrollViewPullToRefreshView;
     switch (newState) {
         case SVPullToRefreshStateAll:
         case SVPullToRefreshStateStopped:
+            if ( previousState == SVPullToRefreshStateLoading ) [self.scrollView setContentOffset:self.scrollView.contentOffset animated:NO];
             [self resetScrollViewContentInset];
+            self.wasTriggeredByUser = YES;
             break;
             
         case SVPullToRefreshStateTriggered:
@@ -683,6 +685,7 @@ static char UIScrollViewPullToRefreshView;
 - (void)drawRect:(CGRect)rect {
 	CGContextRef c = UIGraphicsGetCurrentContext();
 	
+    /*
 	// the rects above the arrow
 	CGContextAddRect(c, CGRectMake(5, 0, 12, 4)); // to-do: use dynamic points
 	CGContextAddRect(c, CGRectMake(5, 6, 12, 4)); // currently fixed size: 22 x 48pt
@@ -697,6 +700,14 @@ static char UIScrollViewPullToRefreshView;
 	CGContextAddLineToPoint(c, 22, 34);
 	CGContextAddLineToPoint(c, 0, 34);
 	CGContextClosePath(c);
+    */
+    
+    // new arrow
+    CGContextMoveToPoint(c, 0, 0);
+	CGContextAddLineToPoint(c, 11, 14);
+	CGContextAddLineToPoint(c, 22, 0);
+	CGContextAddLineToPoint(c, 0, 0);
+    CGContextClosePath(c);
 	
 	CGContextSaveGState(c);
 	CGContextClip(c);
@@ -714,7 +725,7 @@ static char UIScrollViewPullToRefreshView;
         alphaGradient = CGGradientCreateWithColors(colorSpace, (__bridge CFArrayRef)alphaGradientColors, alphaGradientLocations);
     }else{
         const CGFloat * components = CGColorGetComponents([self.arrowColor CGColor]);
-        size_t numComponents = CGColorGetNumberOfComponents([self.arrowColor CGColor]);
+        int numComponents = (int)CGColorGetNumberOfComponents([self.arrowColor CGColor]);
         CGFloat colors[8];
         switch(numComponents){
             case 2:{
