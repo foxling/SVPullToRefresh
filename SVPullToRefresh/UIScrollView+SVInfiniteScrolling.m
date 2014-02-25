@@ -191,20 +191,39 @@ UIEdgeInsets scrollViewOriginalContentInsets;
     }
 }
 
+//- (void)scrollViewDidScroll:(CGPoint)contentOffset {
+//    if(self.state != SVInfiniteScrollingStateLoading && self.enabled) {
+//        if ( contentOffset.y <= 0 ) return;
+//        CGFloat scrollViewContentHeight = self.scrollView.contentSize.height;
+//        CGFloat scrollOffsetThreshold = scrollViewContentHeight-self.scrollView.bounds.size.height;
+//        
+//        if(!self.scrollView.isDragging && self.state == SVInfiniteScrollingStateTriggered)
+//            self.state = SVInfiniteScrollingStateLoading;
+//        else if(contentOffset.y > scrollOffsetThreshold && self.state == SVInfiniteScrollingStateStopped && self.scrollView.isDragging)
+//            self.state = SVInfiniteScrollingStateTriggered;
+//        else if(contentOffset.y < scrollOffsetThreshold  && self.state != SVInfiniteScrollingStateStopped)
+//            self.state = SVInfiniteScrollingStateStopped;
+//    }
+//}
+
+// auto load
 - (void)scrollViewDidScroll:(CGPoint)contentOffset {
     if(self.state != SVInfiniteScrollingStateLoading && self.enabled) {
         if ( contentOffset.y <= 0 ) return;
         CGFloat scrollViewContentHeight = self.scrollView.contentSize.height;
         CGFloat scrollOffsetThreshold = scrollViewContentHeight-self.scrollView.bounds.size.height;
         
-        if(!self.scrollView.isDragging && self.state == SVInfiniteScrollingStateTriggered)
+        if (self.state == SVInfiniteScrollingStateTriggered)
             self.state = SVInfiniteScrollingStateLoading;
-        else if(contentOffset.y > scrollOffsetThreshold && self.state == SVInfiniteScrollingStateStopped && self.scrollView.isDragging)
+
+        else if (contentOffset.y > scrollOffsetThreshold - 100)
             self.state = SVInfiniteScrollingStateTriggered;
-        else if(contentOffset.y < scrollOffsetThreshold  && self.state != SVInfiniteScrollingStateStopped)
+
+        else if (contentOffset.y < scrollOffsetThreshold  && self.state != SVInfiniteScrollingStateStopped)
             self.state = SVInfiniteScrollingStateStopped;
     }
 }
+
 
 #pragma mark - Getters
 
